@@ -1,4 +1,4 @@
-const conn = require('../db');
+const conn = require('../db2');
 const {StatusCodes} = require('http-status-codes');
 
 const getCategory = (req,res)=>{

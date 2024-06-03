@@ -6,3 +6,4 @@ node_modules
 .env
 API설계.docx
 data.sql
+db2.js

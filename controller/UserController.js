@@ -1,4 +1,4 @@
-const conn = require('../db');
+const conn = require('../db2');
 const jwt = require('jsonwebtoken'); 
 const {StatusCodes} = require('http-status-codes');
 const crypto = require('crypto')
@@ -35,6 +35,7 @@ const login =  (req,res,next)=>{
 
             if (loginUser && loginUser.password == hashPassword){
                 const token = jwt.sign({
+                    id : loginUser.id,
                     email : loginUser.email,
                     name : loginUser.name
                 }, process.env.PRIVATE_KEY,{
@@ -50,6 +51,8 @@ const login =  (req,res,next)=>{
                     message : "로그인 되었습니다.",
                     token : "토큰 발급 확인"
                 })
+
+                console.log(token);
             }
             else{
                 res.status(StatusCodes.BAD_REQUEST).json({
