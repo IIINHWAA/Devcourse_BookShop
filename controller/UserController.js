@@ -16,10 +16,13 @@ const join = (req,res,next)=>{
             console.log(err);
             return res.status(StatusCodes.BAD_REQUEST).end();
         }
-    })
 
-    res.status(StatusCodes.CREATED).json({
-        message : "회원 가입 완료"
+        if(results.affectedRows){
+            res.status(StatusCodes.CREATED).json(results);
+        }
+        else{
+            res.status(StatusCodes.BAD_REQUEST).end();
+        }
     })
 };
 
