@@ -9,4 +9,5 @@ router.post('/:id',addLike);
 //좋아요 삭제
 router.delete('/:id',deleteLike);
 
+
 module.exports = router

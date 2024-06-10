@@ -21,13 +21,7 @@ const addToCart = (req, res) =>{
     else{
         let sql = "INSERT INTO cartItems (book_id, quantity, user_id) VALUES (?, ?, ?)";
         let values = [book_id, quantity, authorization.id];
-        conn.query(sql,values,(err, results)=>{
-            if (err){
-                console.log(err);
-                return res.status(StatusCodes.BAD_REQUEST).end();
-            }
-            return res.status(StatusCodes.OK).json(results);
-        })
+        executeQuery(res,sql,values);
     }
 };
 
@@ -45,40 +39,36 @@ const getCartItems = (req, res) =>{
         });
     }
     else{
-        
         let sql = `SELECT cartItems.id, book_id, title, summary, quantity, price 
                 FROM cartItems LEFT JOIN books 
                 ON cartItems.book_id = books.id
                 WHERE user_id=?`
         let values = [authorization.id, selected];
 
-        if(selected){ //선택한 장바구니 목록
+        if(selected){
             sql += ` AND cartItems.id IN (?)`
             values.push(selected); 
         }
     
-        conn.query(sql,values, (err, results)=>{
-            if (err){
-                console.log(err);
-                return res.status(StatusCodes.BAD_REQUEST).end();
-            }
-            return res.status(StatusCodes.OK).json(results);
-        })
+        executeQuery(res,sql,values);
     }
 };
 
 const deleteItems = (req, res) =>{
     const cartItemId = req.params.id;
     let sql = "DELETE FROM cartItems WHERE id = ?"
-    conn.query(sql,cartItemId,(err, results)=>{
-        if (err){
-            console.log(err);
+    executeQuery(res,sql,cartItemId);
+};
+
+const executeQuery = (res, sql, values) => {
+    conn.query(sql, values, (err, results) => {
+        if (err) {
+            console.error(err);
             return res.status(StatusCodes.BAD_REQUEST).end();
         }
         return res.status(StatusCodes.OK).json(results);
-    })
+    });
 };
-
 
 module.exports = {
     addToCart, 

@@ -6,16 +6,20 @@ var dotenv = require('dotenv');
 dotenv.config();
 const DB_PASSWORD = process.env.DB_PASSWORD;
 
-const order = async(req, res) =>{
-    
-    const conn = await mysql.createConnection({
+const connectToDB = async () => {
+    return await mysql.createConnection({
         host: 'localhost',
         port: '3307',
         user: 'root',
-        password : DB_PASSWORD,
+        password: DB_PASSWORD,
         database: 'BookShop',
-        dateStrings : true
+        dateStrings: true
     });
+};
+
+const order = async(req, res) =>{
+    
+    const conn = await connectToDB();
 
     let authorization = ensureAuthorizaion(req);
     if (authorization instanceof jwt.TokenExpiredError){
@@ -43,7 +47,6 @@ const order = async(req, res) =>{
         [results] = await conn.execute(sql,values);
         let order_id = results.insertId;
 
-        //items를 가지고 장바구니에서 인자 꺼냄
         sql =`SELECT book_id, quantity FROM cartItems WHERE id IN (?)`;
         let [orderItems, fields] = await conn.query(sql,[items]);
         console.log(orderItems);
@@ -55,7 +58,6 @@ const order = async(req, res) =>{
         });
         console.log(values);
         results  = await conn.query(sql,[values]);
-
 
         let result = deleteCartItems(conn, items);
         return res.status(StatusCodes.OK).json(result);
@@ -71,15 +73,7 @@ const deleteCartItems = async (conn,items) =>{
 
 
 const getOrders = async (req, res) =>{
-    const conn = await mysql.createConnection({
-        host: 'localhost',
-        port: '3307',
-        user: 'root',
-        password : DB_PASSWORD,
-        database: 'BookShop',
-        dateStrings : true,
-    });
-
+    const conn = await connectToDB();
     let sql = `SELECT orders.id, created_at, address, receiver, contact,
                 book_title, total_quantity, total_price
                 FROM orders LEFT JOIN delivery
@@ -91,15 +85,7 @@ const getOrders = async (req, res) =>{
 
 const getOrderDetail = async(req, res) =>{
     const orderId = req.params.id;
-    const conn = await mysql.createConnection({
-        host: 'localhost',
-        port: '3307',
-        user: 'root',
-        password : DB_PASSWORD,
-        database: 'BookShop',
-        dateStrings : true,
-    });
-
+    const conn = await connectToDB();
     let sql =`SELECT book_id, title, author, price, quantity
                 FROM orderedBook LEFT JOIN books
                 ON orderedBook.book_id = books.id;`;
@@ -107,7 +93,6 @@ const getOrderDetail = async(req, res) =>{
     return res.status(StatusCodes.OK).json(rows);           
 
 };
-
 
 module.exports = {
     order, 
